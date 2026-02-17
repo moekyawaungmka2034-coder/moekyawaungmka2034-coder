@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CYBER.DEV — Neon Cyberpunk</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #000508;
+  --neon: #0ff;
+  --pink: #ff2d78;
+  --yellow: #ffe600;
+  --purple: #b400ff;
+  --text: #c8f0f0;
+  --dim: #1a3a3a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Share Tech Mono',monospace;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* CURSOR */
+.cur{position:fixed;width:6px;height:6px;background:var(--neon);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 12px var(--neon),0 0 24px var(--neon);}
+.cur-trail{position:fixed;width:24px;height:24px;border:1px solid var(--neon);pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all 0.08s linear;opacity:0.5;}
+
+canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+
+/* GRID OVERLAY */
+.grid-overlay{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,255,255,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,255,0.03) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+
+/* SCANLINES */
+.scanlines{
+  position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,0.15),rgba(0,0,0,0.15) 1px,transparent 1px,transparent 3px);
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;width:100%;z-index:100;
+  padding:20px 60px;
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(0,5,8,0.85);
+  border-bottom:1px solid rgba(0,255,255,0.15);
+  backdrop-filter:blur(8px);
+}
+.logo{
+  font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;
+  color:var(--neon);text-shadow:0 0 20px var(--neon),0 0 40px var(--neon);
+  letter-spacing:4px;
+}
+.nav-links{display:flex;gap:32px;list-style:none;}
+.nav-links a{
+  color:var(--dim);text-decoration:none;font-size:11px;letter-spacing:3px;
+  text-transform:uppercase;transition:all 0.3s;
+}
+.nav-links a:hover{color:var(--neon);text-shadow:0 0 10px var(--neon);}
+
+/* STATUS BAR */
+.status{
+  position:fixed;bottom:0;width:100%;z-index:100;
+  padding:8px 60px;
+  background:rgba(0,5,8,0.85);
+  border-top:1px solid rgba(0,255,255,0.1);
+  display:flex;justify-content:space-between;
+  font-size:10px;letter-spacing:2px;color:var(--dim);
+}
+.status-dot{
+  display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--neon);margin-right:8px;
+  box-shadow:0 0 8px var(--neon);
+  animation:blink 1.5s infinite;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+
+section{position:relative;z-index:10;min-height:100vh;}
+
+/* HERO */
+#hero{
+  padding:0 60px;
+  display:flex;flex-direction:column;justify-content:center;
+  position:relative;
+}
+.hero-pre{
+  font-size:11px;letter-spacing:8px;color:var(--neon);
+  text-transform:uppercase;margin-bottom:16px;
+  opacity:0;animation:glide 0.8s 0.4s forwards;
+}
+.hero-pre span{color:var(--pink);}
+
+.hero-h1{
+  font-family:'Rajdhani',sans-serif;
+  font-size:clamp(64px,10vw,150px);
+  font-weight:700;line-height:0.85;
+  letter-spacing:-2px;
+  margin-bottom:40px;
+  opacity:0;animation:glide 0.9s 0.6s forwards;
+}
+.hero-h1 .w1{
+  display:block;color:var(--neon);
+  text-shadow:0 0 30px rgba(0,255,255,0.5),0 0 60px rgba(0,255,255,0.2);
+}
+.hero-h1 .w2{
+  display:block;
+  -webkit-text-stroke:2px var(--pink);
+  color:transparent;
+  text-shadow:0 0 30px rgba(255,45,120,0.4);
+}
+.hero-h1 .w3{display:block;color:var(--yellow);text-shadow:0 0 20px rgba(255,230,0,0.4);}
+
+.hero-sub{
+  max-width:500px;font-size:13px;line-height:2;color:rgba(200,240,240,0.5);
+  margin-bottom:48px;border-left:2px solid var(--neon);padding-left:20px;
+  opacity:0;animation:glide 0.9s 0.8s forwards;
+}
+
+.btns{display:flex;gap:20px;opacity:0;animation:glide 0.9s 1s forwards;}
+
+.btn-cyber{
+  padding:14px 36px;
+  background:transparent;
+  border:1px solid var(--neon);
+  color:var(--neon);
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;letter-spacing:4px;text-transform:uppercase;
+  cursor:none;text-decoration:none;
+  position:relative;overflow:hidden;
+  transition:all 0.3s;
+  box-shadow:0 0 10px rgba(0,255,255,0.2),inset 0 0 10px rgba(0,255,255,0.05);
+}
+.btn-cyber::before{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,255,0.15),transparent);
+  transition:left 0.4s;
+}
+.btn-cyber:hover::before{left:100%;}
+.btn-cyber:hover{box-shadow:0 0 20px rgba(0,255,255,0.4),inset 0 0 20px rgba(0,255,255,0.1);}
+
+.btn-cyber-alt{
+  padding:14px 36px;
+  background:transparent;
+  border:1px solid var(--pink);
+  color:var(--pink);
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;letter-spacing:4px;text-transform:uppercase;
+  cursor:none;text-decoration:none;
+  transition:all 0.3s;
+  box-shadow:0 0 10px rgba(255,45,120,0.2);
+}
+.btn-cyber-alt:hover{box-shadow:0 0 20px rgba(255,45,120,0.4);}
+
+/* CORNER DECORATIONS */
+.corner{position:absolute;width:40px;height:40px;}
+.corner-tl{top:100px;left:60px;border-top:2px solid var(--neon);border-left:2px solid var(--neon);}
+.corner-br{bottom:100px;right:60px;border-bottom:2px solid var(--pink);border-right:2px solid var(--pink);}
+
+/* ABOUT */
+#about{padding:120px 60px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+
+.sec-label{
+  font-size:10px;letter-spacing:6px;text-transform:uppercase;
+  color:var(--neon);margin-bottom:16px;
+  display:flex;align-items:center;gap:12px;
+}
+.sec-label::before{content:'//';color:var(--pink);}
+
+.sec-h2{
+  font-family:'Rajdhani',sans-serif;font-size:clamp(40px,5vw,72px);
+  font-weight:700;line-height:0.95;letter-spacing:-1px;margin-bottom:24px;
+}
+.sec-h2 em{
+  font-style:normal;color:var(--neon);
+  text-shadow:0 0 20px rgba(0,255,255,0.4);
+}
+
+.about-p{font-size:12px;line-height:2.2;color:rgba(200,240,240,0.5);margin-bottom:16px;}
+
+/* TERMINAL BOX */
+.terminal{
+  background:rgba(0,255,255,0.03);
+  border:1px solid rgba(0,255,255,0.15);
+  padding:24px;font-size:12px;line-height:2;
+  position:relative;margin-top:32px;
+}
+.terminal::before{
+  content:'terminal.exe';position:absolute;top:-10px;left:16px;
+  background:var(--bg);padding:0 8px;
+  font-size:9px;letter-spacing:3px;color:var(--neon);
+}
+.t-line{color:rgba(200,240,240,0.4);}
+.t-line span{color:var(--neon);}
+.t-line .t-val{color:var(--yellow);}
+.t-line .t-str{color:var(--pink);}
+
+/* SKILLS */
+#skills{padding:120px 60px;}
+
+.skills-row{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:60px;}
+
+.sk-card{
+  padding:32px;
+  background:rgba(0,255,255,0.02);
+  border:1px solid rgba(0,255,255,0.08);
+  position:relative;overflow:hidden;
+  transition:all 0.4s;cursor:none;
+}
+.sk-card::after{
+  content:'';position:absolute;bottom:0;left:0;
+  width:0;height:2px;background:var(--neon);
+  box-shadow:0 0 10px var(--neon);
+  transition:width 0.4s;
+}
+.sk-card:hover{background:rgba(0,255,255,0.05);border-color:rgba(0,255,255,0.25);}
+.sk-card:hover::after{width:100%;}
+
+.sk-num{
+  font-family:'Rajdhani',sans-serif;font-size:72px;font-weight:700;
+  color:rgba(0,255,255,0.06);line-height:1;position:absolute;right:20px;top:16px;
+  transition:color 0.4s;
+}
+.sk-card:hover .sk-num{color:rgba(0,255,255,0.12);}
+.sk-name{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:600;color:var(--neon);margin-bottom:12px;text-shadow:0 0 10px rgba(0,255,255,0.3);}
+.sk-desc{font-size:11px;line-height:1.9;color:rgba(200,240,240,0.4);margin-bottom:24px;}
+.sk-tags{display:flex;flex-wrap:wrap;gap:8px;}
+.sk-tag{
+  padding:4px 12px;border:1px solid rgba(0,255,255,0.2);
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--neon);
+}
+
+/* PROJECTS */
+#projects{padding:120px 60px;}
+
+.proj-list{margin-top:60px;display:flex;flex-direction:column;gap:2px;}
+
+.proj-item{
+  display:grid;grid-template-columns:80px 1fr auto;align-items:center;
+  padding:28px 32px;border:1px solid rgba(0,255,255,0.06);
+  background:rgba(0,255,255,0.01);
+  transition:all 0.3s;cursor:none;position:relative;overflow:hidden;
+}
+.proj-item::before{
+  content:'';position:absolute;left:0;top:0;width:0;height:100%;
+  background:rgba(0,255,255,0.04);transition:width 0.4s;
+}
+.proj-item:hover{border-color:rgba(0,255,255,0.2);}
+.proj-item:hover::before{width:100%;}
+
+.proj-idx{font-size:11px;letter-spacing:2px;color:rgba(0,255,255,0.3);}
+.proj-info{}
+.proj-name{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.proj-meta{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(200,240,240,0.3);}
+.proj-arrow{
+  width:40px;height:40px;border:1px solid rgba(0,255,255,0.2);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--neon);font-size:18px;
+  transition:all 0.3s;
+}
+.proj-item:hover .proj-arrow{background:var(--neon);color:var(--bg);box-shadow:0 0 20px var(--neon);}
+
+/* CONTACT */
+#contact{padding:120px 60px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+
+.contact-h{
+  font-family:'Rajdhani',sans-serif;
+  font-size:clamp(40px,7vw,100px);
+  font-weight:700;line-height:0.9;
+  margin-bottom:40px;
+  color:var(--neon);
+  text-shadow:0 0 40px rgba(0,255,255,0.3),0 0 80px rgba(0,255,255,0.1);
+}
+.contact-sub{font-size:12px;letter-spacing:4px;color:rgba(200,240,240,0.4);margin-bottom:48px;}
+
+.contact-email{
+  font-family:'Rajdhani',sans-serif;font-size:28px;
+  color:var(--neon);text-decoration:none;letter-spacing:4px;
+  border-bottom:1px solid rgba(0,255,255,0.3);
+  padding-bottom:8px;
+  text-shadow:0 0 20px rgba(0,255,255,0.4);
+  transition:all 0.3s;
+}
+.contact-email:hover{text-shadow:0 0 40px var(--neon);}
+
+footer{position:relative;z-index:10;padding:24px 60px;border-top:1px solid rgba(0,255,255,0.08);display:flex;justify-content:space-between;font-size:9px;letter-spacing:3px;color:rgba(200,240,240,0.2);}
+
+@keyframes glide{from{opacity:0;transform:translateX(-20px);}to{opacity:1;transform:translateX(0);}}
+
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 0.8s,transform 0.8s;}
+.reveal.visible{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+
+<div class="cur" id="cur"></div>
+<div class="cur-trail" id="curTrail"></div>
+<canvas id="c"></canvas>
+<div class="grid-overlay"></div>
+<div class="scanlines"></div>
+
+<nav>
+  <div class="logo">CYBER.DEV</div>
+  <ul class="nav-links">
+    <li><a href="#about">// ABOUT</a></li>
+    <li><a href="#skills">// SKILLS</a></li>
+    <li><a href="#projects">// WORK</a></li>
+    <li><a href="#contact">// CONTACT</a></li>
+  </ul>
+</nav>
+
+<div class="status">
+  <span><span class="status-dot"></span>SYSTEM ONLINE — v2.4.1</span>
+  <span id="live-time">00:00:00</span>
+  <span>LOC: YANGON.MM // NET: SECURE</span>
+</div>
+
+<section id="hero">
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-br"></div>
+  <div class="hero-pre">INITIALIZING_PORTFOLIO <span>[MKA.SYS]</span></div>
+  <h1 class="hero-h1">
+    <span class="w1">FULL</span>
+    <span class="w2">STACK</span>
+    <span class="w3">DEV</span>
+  </h1>
+  <p class="hero-sub">
+    Building systems at the intersection of code and creativity.<br>
+    Specializing in immersive interfaces, real-time applications, and experiences that break the fourth wall.
+  </p>
+  <div class="btns">
+    <a href="#projects" class="btn-cyber">[ VIEW_PROJECTS ]</a>
+    <a href="#contact" class="btn-cyber-alt">[ INITIALIZE_CONTACT ]</a>
+  </div>
+</section>
+
+<section id="about">
+  <div>
+    <div class="sec-label reveal">PROFILE_DATA</div>
+    <h2 class="sec-h2 reveal">Architect of<br><em>Digital</em><br>Systems</h2>
+    <p class="about-p reveal">5+ years engineering high-performance applications for startups and enterprises across Southeast Asia. Former CTO at two funded startups.</p>
+    <p class="about-p reveal">Obsessed with the space where engineering precision meets design intuition.</p>
+    <div class="terminal reveal">
+      <div class="t-line">&gt; <span>whoami</span></div>
+      <div class="t-line"><span class="t-val">MoeKyawAung</span></div>
+      <div class="t-line">&gt; <span>location</span></div>
+      <div class="t-line"><span class="t-val">"Yangon, Myanmar"</span></div>
+      <div class="t-line">&gt; <span>status</span></div>
+      <div class="t-line"><span class="t-str">AVAILABLE_FOR_HIRE <span style="color:var(--neon)">✓</span></span></div>
+      <div class="t-line">&gt; <span>experience</span></div>
+      <div class="t-line"><span class="t-val">5</span> <span style="color:rgba(200,240,240,0.3)">// years</span></div>
+      <div class="t-line">&gt; <span>_</span><span style="animation:blink 1s infinite;display:inline-block;">█</span></div>
+    </div>
+  </div>
+
+  <div class="reveal" style="display:flex;flex-direction:column;gap:2px;">
+    <div style="padding:24px;border:1px solid rgba(0,255,255,0.1);background:rgba(0,255,255,0.03);">
+      <div style="font-size:10px;letter-spacing:4px;color:rgba(200,240,240,0.3);margin-bottom:8px;">PROJECTS_SHIPPED</div>
+      <div style="font-family:'Rajdhani',sans-serif;font-size:64px;font-weight:700;color:var(--neon);text-shadow:0 0 20px rgba(0,255,255,0.4);line-height:1;">50+</div>
+    </div>
+    <div style="padding:24px;border:1px solid rgba(255,45,120,0.1);background:rgba(255,45,120,0.03);">
+      <div style="font-size:10px;letter-spacing:4px;color:rgba(200,240,240,0.3);margin-bottom:8px;">CLIENTS_SERVED</div>
+      <div style="font-family:'Rajdhani',sans-serif;font-size:64px;font-weight:700;color:var(--pink);text-shadow:0 0 20px rgba(255,45,120,0.4);line-height:1;">30+</div>
+    </div>
+    <div style="padding:24px;border:1px solid rgba(255,230,0,0.1);background:rgba(255,230,0,0.03);">
+      <div style="font-size:10px;letter-spacing:4px;color:rgba(200,240,240,0.3);margin-bottom:8px;">UPTIME_MAINTAINED</div>
+      <div style="font-family:'Rajdhani',sans-serif;font-size:64px;font-weight:700;color:var(--yellow);text-shadow:0 0 20px rgba(255,230,0,0.3);line-height:1;">99.9%</div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="sec-label reveal">TECH_STACK</div>
+  <h2 class="sec-h2 reveal">Core <em>Systems</em></h2>
+  <div class="skills-row">
+    <div class="sk-card reveal">
+      <div class="sk-num">01</div>
+      <div class="sk-name">FRONTEND</div>
+      <div class="sk-desc">Building reactive, high-performance interfaces with modern tooling and obsessive attention to micro-interactions.</div>
+      <div class="sk-tags">
+        <span class="sk-tag">React</span><span class="sk-tag">Vue</span><span class="sk-tag">Three.js</span><span class="sk-tag">GSAP</span>
+      </div>
+    </div>
+    <div class="sk-card reveal">
+      <div class="sk-num">02</div>
+      <div class="sk-name">BACKEND</div>
+      <div class="sk-desc">Scalable APIs, microservices architecture, real-time systems, and cloud-native deployments.</div>
+      <div class="sk-tags">
+        <span class="sk-tag">Node.js</span><span class="sk-tag">Python</span><span class="sk-tag">Go</span><span class="sk-tag">AWS</span>
+      </div>
+    </div>
+    <div class="sk-card reveal">
+      <div class="sk-num">03</div>
+      <div class="sk-name">MOBILE</div>
+      <div class="sk-desc">Cross-platform applications with native performance, smooth animations, and intuitive UX.</div>
+      <div class="sk-tags">
+        <span class="sk-tag">React Native</span><span class="sk-tag">Flutter</span><span class="sk-tag">Swift</span>
+      </div>
+    </div>
+    <div class="sk-card reveal">
+      <div class="sk-num">04</div>
+      <div class="sk-name">DATABASE</div>
+      <div class="sk-desc">Data modeling, query optimization, real-time sync, and distributed systems design.</div>
+      <div class="sk-tags">
+        <span class="sk-tag">PostgreSQL</span><span class="sk-tag">Redis</span><span class="sk-tag">MongoDB</span>
+      </div>
+    </div>
+    <div class="sk-card reveal">
+      <div class="sk-num">05</div>
+      <div class="sk-name">DEVOPS</div>
+      <div class="sk-desc">CI/CD pipelines, container orchestration, monitoring, and zero-downtime deployments.</div>
+      <div class="sk-tags">
+        <span class="sk-tag">Docker</span><span class="sk-tag">K8s</span><span class="sk-tag">GitHub Actions</span>
+      </div>
+    </div>
+    <div class="sk-card reveal">
+      <div class="sk-num">06</div>
+      <div class="sk-name">AI/ML</div>
+      <div class="sk-desc">Integrating intelligent systems, fine-tuning models, and building AI-native product features.</div>
+      <div class="sk-tags">
+        <span class="sk-tag">TensorFlow</span><span class="sk-tag">LangChain</span><span class="sk-tag">OpenAI</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="sec-label reveal">MISSION_LOG</div>
+  <h2 class="sec-h2 reveal">Selected <em>Operations</em></h2>
+  <div class="proj-list reveal">
+    <div class="proj-item">
+      <div class="proj-idx">01</div>
+      <div class="proj-info">
+        <div class="proj-name">NebulaOS</div>
+        <div class="proj-meta">Web Application · React · Three.js · 2024</div>
+      </div>
+      <div class="proj-arrow">→</div>
+    </div>
+    <div class="proj-item">
+      <div class="proj-idx">02</div>
+      <div class="proj-info">
+        <div class="proj-name">VoidMarket</div>
+        <div class="proj-meta">E-Commerce Platform · Node.js · PostgreSQL · 2024</div>
+      </div>
+      <div class="proj-arrow">→</div>
+    </div>
+    <div class="proj-item">
+      <div class="proj-idx">03</div>
+      <div class="proj-info">
+        <div class="proj-name">NeuralLink Dashboard</div>
+        <div class="proj-meta">Analytics SaaS · Real-time · D3.js · 2023</div>
+      </div>
+      <div class="proj-arrow">→</div>
+    </div>
+    <div class="proj-item">
+      <div class="proj-idx">04</div>
+      <div class="proj-info">
+        <div class="proj-name">Phantom Mobile</div>
+        <div class="proj-meta">Mobile App · React Native · 50k+ Users · 2023</div>
+      </div>
+      <div class="proj-arrow">→</div>
+    </div>
+    <div class="proj-item">
+      <div class="proj-idx">05</div>
+      <div class="proj-info">
+        <div class="proj-name">Crimson AI</div>
+        <div class="proj-meta">AI Platform · Python · LangChain · GPT-4 · 2023</div>
+      </div>
+      <div class="proj-arrow">→</div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="sec-label reveal">OPEN_CHANNEL</div>
+  <div class="contact-h reveal">LET'S<br>BUILD</div>
+  <p class="contact-sub reveal">[ CURRENTLY ACCEPTING NEW MISSIONS ]</p>
+  <a href="mailto:moekyawaung@cyber.dev" class="contact-email reveal">moekyawaung@cyber.dev</a>
+</section>
+
+<footer>
+  <span>© 2024 CYBER.DEV // ALL RIGHTS RESERVED</span>
+  <span>BUILD v2.4.1 — THREE.JS + CSS3</span>
+  <span>YANGON.MM</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// CURSOR
+const cur = document.getElementById('cur');
+const trail = document.getElementById('curTrail');
+let mx=0,my=0,tx=0,ty=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+});
+function animTrail(){
+  tx+=(mx-tx)*0.1;ty+=(my-ty)*0.1;
+  trail.style.left=tx+'px';trail.style.top=ty+'px';
+  requestAnimationFrame(animTrail);
+}
+animTrail();
+
+// CLOCK
+function updateClock(){
+  const n=new Date();
+  document.getElementById('live-time').textContent=
+    String(n.getHours()).padStart(2,'0')+':'+
+    String(n.getMinutes()).padStart(2,'0')+':'+
+    String(n.getSeconds()).padStart(2,'0');
+}
+setInterval(updateClock,1000);updateClock();
+
+// THREE.JS
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,500);
+cam.position.z=60;
+
+// GRID OF NEON LINES
+function makeGrid(){
+  const g=new THREE.Group();
+  const mat=new THREE.LineBasicMaterial({color:0x00ffff,transparent:true,opacity:0.08});
+  for(let i=-20;i<=20;i+=2){
+    const h=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-20,i,-20),new THREE.Vector3(20,i,-20)]);
+    const v=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(i,-20,-20),new THREE.Vector3(i,20,-20)]);
+    g.add(new THREE.Line(h,mat));
+    g.add(new THREE.Line(v,mat));
+  }
+  return g;
+}
+const grid=makeGrid();
+scene.add(grid);
+
+// PARTICLES LINES
+const lineCount=80;
+const lines=[];
+for(let i=0;i<lineCount;i++){
+  const length=Math.random()*8+2;
+  const geo=new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0,0,0),
+    new THREE.Vector3(length,0,0)
+  ]);
+  const colors=[0x00ffff,0xff2d78,0xffe600,0xb400ff];
+  const mat=new THREE.LineBasicMaterial({
+    color:colors[Math.floor(Math.random()*colors.length)],
+    transparent:true,opacity:Math.random()*0.6+0.2
+  });
+  const line=new THREE.Line(geo,mat);
+  line.position.set(
+    (Math.random()-0.5)*100,
+    (Math.random()-0.5)*80,
+    (Math.random()-0.5)*60-20
+  );
+  line.rotation.z=Math.random()*Math.PI;
+  line.userData={speedX:(Math.random()-0.5)*0.02,speedY:(Math.random()-0.5)*0.02,speedZ:Math.random()*0.05+0.02};
+  scene.add(line);
+  lines.push(line);
+}
+
+let moX=0,moY=0;
+document.addEventListener('mousemove',e=>{
+  moX=(e.clientX/innerWidth-0.5)*0.5;
+  moY=-(e.clientY/innerHeight-0.5)*0.5;
+});
+
+window.addEventListener('resize',()=>{
+  cam.aspect=innerWidth/innerHeight;
+  cam.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+
+const clock=new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const t=clock.getElapsedTime();
+
+  lines.forEach(l=>{
+    l.position.z+=l.userData.speedZ;
+    if(l.position.z>40)l.position.z=-60;
+    l.rotation.z+=0.002;
+  });
+
+  grid.rotation.x=moY*0.3;
+  grid.rotation.y=moX*0.3;
+
+  cam.position.x+=(moX*10-cam.position.x)*0.02;
+  cam.position.y+=(moY*5-cam.position.y)*0.02;
+  cam.lookAt(scene.position);
+
+  renderer.render(scene,cam);
+}
+animate();
+
+// REVEAL
+document.querySelectorAll('.reveal').forEach(el=>{
+  new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});
+  },{threshold:0.1}).observe(el);
+});
+</script>
+</body>
+</html>
