@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MKA — Luxury Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0b09;
+  --surface:#141210;
+  --gold:#c9a84c;
+  --gold-lt:#e8cb7a;
+  --gold-dk:#8b6914;
+  --cream:#f0e8d8;
+  --text:#d4c9b0;
+  --dim:#5a5040;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Montserrat',sans-serif;
+  font-weight:300;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+.cur{
+  position:fixed;width:8px;height:8px;
+  background:var(--gold);
+  border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 12px var(--gold);
+}
+.cur-ring{
+  position:fixed;width:36px;height:36px;
+  border:1px solid rgba(201,168,76,0.5);
+  border-radius:50%;pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:all 0.12s ease-out;
+}
+
+canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+
+/* MARBLE TEXTURE OVERLAY */
+.marble{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.015' numOctaves='8' seed='5'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23m)' opacity='0.04'/%3E%3C/svg%3E");
+  mix-blend-mode:overlay;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;width:100%;z-index:100;
+  padding:32px 80px;
+  display:flex;justify-content:space-between;align-items:center;
+  background:linear-gradient(to bottom,rgba(12,11,9,0.95),transparent);
+}
+.logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:14px;font-weight:400;letter-spacing:12px;
+  text-transform:uppercase;color:var(--gold);
+}
+.nav-links{display:flex;gap:48px;list-style:none;}
+.nav-links a{
+  color:var(--dim);text-decoration:none;
+  font-size:10px;letter-spacing:4px;text-transform:uppercase;font-weight:400;
+  transition:color 0.4s;
+}
+.nav-links a:hover{color:var(--gold);}
+
+section{position:relative;z-index:10;min-height:100vh;}
+
+/* HERO */
+#hero{
+  padding:0 80px;
+  display:flex;flex-direction:column;justify-content:center;
+  position:relative;
+}
+
+.ornament{
+  font-size:14px;letter-spacing:8px;color:var(--gold);
+  margin-bottom:32px;opacity:0;animation:luxFade 1.2s 0.4s forwards;
+  display:flex;align-items:center;gap:24px;
+}
+.ornament::before,.ornament::after{
+  content:'';flex:1;max-width:60px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold));
+}
+.ornament::after{background:linear-gradient(270deg,transparent,var(--gold));}
+
+.hero-h1{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(64px,10vw,160px);
+  font-weight:300;line-height:0.88;
+  letter-spacing:-2px;
+  margin-bottom:48px;
+  opacity:0;animation:luxFade 1.2s 0.7s forwards;
+}
+.hero-h1 .l1{display:block;color:var(--cream);font-style:italic;}
+.hero-h1 .l2{
+  display:block;
+  background:linear-gradient(135deg,var(--gold-dk),var(--gold),var(--gold-lt),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  background-size:300%;
+  animation:goldShimmer 4s infinite alternate;
+}
+.hero-h1 .l3{display:block;color:var(--cream);font-size:0.5em;letter-spacing:12px;text-transform:uppercase;font-weight:400;font-style:normal;margin-top:20px;}
+
+@keyframes goldShimmer{from{background-position:0%;}to{background-position:100%;}}
+
+.hero-sub{
+  max-width:440px;
+  font-size:13px;font-weight:300;line-height:2.2;letter-spacing:1px;
+  color:var(--dim);margin-bottom:56px;
+  opacity:0;animation:luxFade 1.2s 1s forwards;
+}
+
+.btn-lux{
+  padding:18px 56px;
+  background:transparent;
+  border:1px solid var(--gold);
+  color:var(--gold);
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;letter-spacing:6px;text-transform:uppercase;font-weight:400;
+  cursor:none;text-decoration:none;
+  position:relative;overflow:hidden;
+  transition:color 0.5s;
+  display:inline-block;
+  opacity:0;animation:luxFade 1.2s 1.3s forwards;
+}
+.btn-lux::before{
+  content:'';position:absolute;
+  top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(135deg,var(--gold-dk),var(--gold),var(--gold-lt));
+  transition:left 0.5s;z-index:-1;
+}
+.btn-lux:hover{color:var(--bg);}
+.btn-lux:hover::before{left:0;}
+
+/* DIVIDER */
+.gold-divider{
+  display:flex;align-items:center;gap:24px;
+  padding:0 80px;margin:40px 0;position:relative;z-index:10;
+  opacity:0;animation:luxFade 1.2s 1.6s forwards;
+}
+.gold-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dk),var(--gold),var(--gold-dk),transparent);}
+.gold-diamond{
+  width:12px;height:12px;background:var(--gold);
+  transform:rotate(45deg);flex-shrink:0;
+  box-shadow:0 0 20px rgba(201,168,76,0.4);
+}
+
+/* ABOUT */
+#about{padding:120px 80px;display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center;}
+
+.sec-eyebrow{
+  font-size:10px;letter-spacing:6px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:24px;
+  display:flex;align-items:center;gap:16px;font-weight:400;
+}
+.sec-eyebrow::before{content:'';width:40px;height:1px;background:var(--gold);}
+
+.sec-h2{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(40px,5vw,72px);
+  font-weight:300;line-height:1;letter-spacing:-1px;margin-bottom:32px;
+}
+.sec-h2 em{font-style:italic;color:var(--gold);}
+
+.about-p{font-size:12px;line-height:2.4;color:var(--dim);margin-bottom:16px;letter-spacing:0.5px;}
+
+.quote-block{
+  margin-top:40px;padding:32px 40px;
+  border-left:1px solid var(--gold);
+  position:relative;
+}
+.quote-block::before{
+  content:'\201C';position:absolute;top:-10px;left:24px;
+  font-family:'Cormorant Garamond',serif;font-size:80px;
+  color:var(--gold);opacity:0.3;line-height:1;
+}
+.quote-text{font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;color:var(--cream);line-height:1.6;letter-spacing:0.5px;}
+.quote-auth{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-top:16px;}
+
+/* ABOUT VISUAL */
+.about-visual{position:relative;display:flex;flex-direction:column;gap:2px;}
+
+.lux-stat{
+  padding:40px 48px;
+  background:linear-gradient(135deg,rgba(201,168,76,0.04),rgba(201,168,76,0.01));
+  border:1px solid rgba(201,168,76,0.12);
+  position:relative;overflow:hidden;
+  transition:border-color 0.5s;
+}
+.lux-stat::after{
+  content:'';position:absolute;bottom:0;left:0;width:0;height:1px;
+  background:linear-gradient(90deg,var(--gold-dk),var(--gold));
+  transition:width 0.6s;
+}
+.lux-stat:hover{border-color:rgba(201,168,76,0.3);}
+.lux-stat:hover::after{width:100%;}
+.lux-stat-num{
+  font-family:'Cormorant Garamond',serif;font-size:72px;font-weight:300;
+  color:var(--gold);line-height:1;letter-spacing:-2px;
+}
+.lux-stat-label{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--dim);margin-top:8px;}
+
+/* SERVICES */
+#services{padding:120px 80px;}
+
+.services-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  border:1px solid rgba(201,168,76,0.1);
+  margin-top:60px;
+  background:rgba(201,168,76,0.08);
+}
+.srv-card{
+  padding:48px 40px;
+  background:var(--bg);
+  transition:background 0.5s;cursor:none;
+  position:relative;overflow:hidden;
+}
+.srv-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:0;
+  background:linear-gradient(to bottom,rgba(201,168,76,0.04),transparent);
+  transition:height 0.5s;
+}
+.srv-card:hover{background:rgba(20,18,16,1);}
+.srv-card:hover::before{height:100%;}
+
+.srv-num{font-size:10px;letter-spacing:4px;color:var(--gold);margin-bottom:32px;opacity:0.6;}
+.srv-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:var(--cream);margin-bottom:16px;letter-spacing:-0.5px;}
+.srv-desc{font-size:12px;line-height:2.2;color:var(--dim);}
+
+/* PROJECTS */
+#projects{padding:120px 80px;}
+
+.proj-showcase{display:flex;flex-direction:column;gap:1px;margin-top:60px;}
+.proj-row{
+  display:grid;grid-template-columns:120px 1fr 200px 80px;align-items:center;
+  padding:36px 48px;border:1px solid rgba(201,168,76,0.08);
+  transition:all 0.5s;cursor:none;position:relative;overflow:hidden;
+  gap:40px;
+}
+.proj-row::after{
+  content:'';position:absolute;left:0;top:0;width:0;height:100%;
+  background:linear-gradient(90deg,rgba(201,168,76,0.03),transparent);
+  transition:width 0.5s;
+}
+.proj-row:hover{border-color:rgba(201,168,76,0.25);}
+.proj-row:hover::after{width:60%;}
+
+.proj-year{font-size:11px;letter-spacing:3px;color:var(--dim);}
+.proj-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--cream);letter-spacing:-0.5px;}
+.proj-cat{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);text-align:right;}
+.proj-link{
+  width:48px;height:48px;border:1px solid rgba(201,168,76,0.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:var(--gold);
+  transition:all 0.4s;margin-left:auto;
+}
+.proj-row:hover .proj-link{background:var(--gold);color:var(--bg);}
+
+/* CONTACT */
+#contact{padding:120px 80px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+
+.contact-h{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(48px,8vw,120px);
+  font-weight:300;font-style:italic;line-height:0.9;
+  color:var(--cream);margin-bottom:16px;
+}
+.contact-h span{
+  background:linear-gradient(135deg,var(--gold-dk),var(--gold),var(--gold-lt));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  font-style:normal;
+}
+.contact-sub{font-size:10px;letter-spacing:8px;text-transform:uppercase;color:var(--dim);margin:32px 0 56px;}
+
+.contact-email{
+  font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;
+  color:var(--gold);text-decoration:none;letter-spacing:4px;
+  border-bottom:1px solid rgba(201,168,76,0.3);padding-bottom:8px;
+  transition:all 0.4s;
+}
+.contact-email:hover{border-color:var(--gold);}
+
+footer{
+  position:relative;z-index:10;padding:32px 80px;
+  border-top:1px solid rgba(201,168,76,0.1);
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--dim);
+}
+
+@keyframes luxFade{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:none;}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 1s,transform 1s;}
+.reveal.visible{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+
+<div class="cur" id="cur"></div>
+<div class="cur-ring" id="curRing"></div>
+<canvas id="c"></canvas>
+<div class="marble"></div>
+
+<nav>
+  <div class="logo">Moe Kyaw Aung</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#projects">Work</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<section id="hero">
+  <div class="ornament">Portfolio · 2024</div>
+  <h1 class="hero-h1">
+    <span class="l1">Digital</span>
+    <span class="l2">Excellence</span>
+    <span class="l3">Crafted with Precision</span>
+  </h1>
+  <p class="hero-sub">
+    A digital artisan creating extraordinary experiences where aesthetic refinement meets technical mastery. Available for bespoke projects.
+  </p>
+  <a href="#projects" class="btn-lux">View Selected Works</a>
+</section>
+
+<div class="gold-divider">
+  <div class="gold-line"></div>
+  <div class="gold-diamond"></div>
+  <div class="gold-line"></div>
+</div>
+
+<section id="about">
+  <div>
+    <div class="sec-eyebrow reveal">The Artisan</div>
+    <h2 class="sec-h2 reveal">Where Code<br>Becomes <em>Art</em></h2>
+    <p class="about-p reveal">With over five years of deliberate craft, I specialize in creating digital experiences that transcend functionality — experiences that evoke emotion, inspire action, and stand the test of time.</p>
+    <p class="about-p reveal">Every project begins with deep listening, followed by thoughtful design, and culminates in flawless execution. No shortcuts. No compromises.</p>
+    <div class="quote-block reveal">
+      <div class="quote-text">"Design is not just what it looks like and feels like. Design is how it works."</div>
+      <div class="quote-auth">— Steve Jobs</div>
+    </div>
+  </div>
+
+  <div class="about-visual reveal">
+    <div class="lux-stat">
+      <div class="lux-stat-num">50+</div>
+      <div class="lux-stat-label">Bespoke Projects</div>
+    </div>
+    <div class="lux-stat">
+      <div class="lux-stat-num">30+</div>
+      <div class="lux-stat-label">Distinguished Clients</div>
+    </div>
+    <div class="lux-stat">
+      <div class="lux-stat-num">5+</div>
+      <div class="lux-stat-label">Years of Mastery</div>
+    </div>
+    <div class="lux-stat">
+      <div class="lux-stat-num">12</div>
+      <div class="lux-stat-label">Industry Awards</div>
+    </div>
+  </div>
+</section>
+
+<section id="services">
+  <div class="sec-eyebrow reveal">Offerings</div>
+  <h2 class="sec-h2 reveal">Bespoke <em>Services</em></h2>
+  <div class="services-grid">
+    <div class="srv-card reveal">
+      <div class="srv-num">01</div>
+      <div class="srv-name">Digital Design</div>
+      <div class="srv-desc">Crafting visual identities and interfaces that command attention and communicate with precision.</div>
+    </div>
+    <div class="srv-card reveal">
+      <div class="srv-num">02</div>
+      <div class="srv-name">Web Development</div>
+      <div class="srv-desc">Engineering performant, scalable web applications with meticulous attention to every interaction.</div>
+    </div>
+    <div class="srv-card reveal">
+      <div class="srv-num">03</div>
+      <div class="srv-name">Brand Strategy</div>
+      <div class="srv-desc">Positioning brands in the digital landscape with clarity, elegance, and lasting impact.</div>
+    </div>
+    <div class="srv-card reveal">
+      <div class="srv-num">04</div>
+      <div class="srv-name">Motion & 3D</div>
+      <div class="srv-desc">Creating immersive animated experiences that blur the boundary between digital and reality.</div>
+    </div>
+    <div class="srv-card reveal">
+      <div class="srv-num">05</div>
+      <div class="srv-name">Consultation</div>
+      <div class="srv-desc">Strategic advisory for businesses seeking to elevate their digital presence and technical foundation.</div>
+    </div>
+    <div class="srv-card reveal">
+      <div class="srv-num">06</div>
+      <div class="srv-name">E-Commerce</div>
+      <div class="srv-desc">Luxury digital storefronts that convert browsers into devoted customers through refined UX.</div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="sec-eyebrow reveal">Portfolio</div>
+  <h2 class="sec-h2 reveal">Selected <em>Works</em></h2>
+  <div class="proj-showcase reveal">
+    <div class="proj-row">
+      <div class="proj-year">2024</div>
+      <div class="proj-title">NebulaOS</div>
+      <div class="proj-cat">Web Application</div>
+      <div class="proj-link">→</div>
+    </div>
+    <div class="proj-row">
+      <div class="proj-year">2024</div>
+      <div class="proj-title">Aurore Maison</div>
+      <div class="proj-cat">Luxury Brand</div>
+      <div class="proj-link">→</div>
+    </div>
+    <div class="proj-row">
+      <div class="proj-year">2023</div>
+      <div class="proj-title">Velvet Commerce</div>
+      <div class="proj-cat">E-Commerce</div>
+      <div class="proj-link">→</div>
+    </div>
+    <div class="proj-row">
+      <div class="proj-year">2023</div>
+      <div class="proj-title">Meridian Finance</div>
+      <div class="proj-cat">FinTech</div>
+      <div class="proj-link">→</div>
+    </div>
+    <div class="proj-row">
+      <div class="proj-year">2022</div>
+      <div class="proj-title">Onyx Dashboard</div>
+      <div class="proj-cat">SaaS Platform</div>
+      <div class="proj-link">→</div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="sec-eyebrow reveal">Begin a Conversation</div>
+  <div class="contact-h reveal">Let Us<br><span>Create</span><br>Together</div>
+  <p class="contact-sub reveal">Available for select projects worldwide</p>
+  <a href="mailto:hello@mka.studio" class="contact-email reveal">hello@mka.studio</a>
+</section>
+
+<footer>
+  <span>© 2024 Moe Kyaw Aung</span>
+  <div class="gold-diamond" style="width:8px;height:8px;background:var(--gold);transform:rotate(45deg);"></div>
+  <span>Yangon, Myanmar</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const cur=document.getElementById('cur');
+const curRing=document.getElementById('curRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+});
+function animR(){rx+=(mx-rx)*0.1;ry+=(my-ry)*0.1;curRing.style.left=rx+'px';curRing.style.top=ry+'px';requestAnimationFrame(animR);}
+animR();
+
+// THREE.JS — Floating gold dust
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,300);
+cam.position.z=60;
+
+// Gold dust particles
+const N=2000;
+const geo=new THREE.BufferGeometry();
+const pos=new Float32Array(N*3);
+const cols=new Float32Array(N*3);
+const siz=new Float32Array(N);
+const goldCols=[
+  [0.8,0.65,0.29],[0.91,0.8,0.48],[0.55,0.42,0.08],[1,0.95,0.7]
+];
+for(let i=0;i<N;i++){
+  pos[i*3]=(Math.random()-0.5)*120;
+  pos[i*3+1]=(Math.random()-0.5)*100;
+  pos[i*3+2]=(Math.random()-0.5)*80;
+  const c=goldCols[Math.floor(Math.random()*goldCols.length)];
+  cols[i*3]=c[0];cols[i*3+1]=c[1];cols[i*3+2]=c[2];
+  siz[i]=0.5+Math.random()*2;
+}
+geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+geo.setAttribute('color',new THREE.BufferAttribute(cols,3));
+geo.setAttribute('size',new THREE.BufferAttribute(siz,1));
+
+const vs=`
+attribute float size; varying vec3 vColor; uniform float uT;
+void main(){
+  vColor=color;
+  vec3 p=position;
+  p.y+=sin(uT*0.4+position.x*0.04)*1.5;
+  p.x+=cos(uT*0.3+position.z*0.04)*1.0;
+  vec4 mv=modelViewMatrix*vec4(p,1.0);
+  gl_PointSize=size*(200./-mv.z);
+  gl_Position=projectionMatrix*mv;
+}`;
+const fs=`
+varying vec3 vColor;
+void main(){
+  float d=distance(gl_PointCoord,vec2(0.5));
+  if(d>0.5)discard;
+  float a=1.0-smoothstep(0.2,0.5,d);
+  gl_FragColor=vec4(vColor,a*0.6);
+}`;
+
+const mat=new THREE.ShaderMaterial({
+  vertexShader:vs,fragmentShader:fs,
+  uniforms:{uT:{value:0}},
+  vertexColors:true,transparent:true,depthWrite:false,
+  blending:THREE.AdditiveBlending,
+});
+scene.add(new THREE.Points(geo,mat));
+
+// Thin rings
+for(let i=0;i<4;i++){
+  const ring=new THREE.Mesh(
+    new THREE.TorusGeometry(15+i*8,0.05,8,80),
+    new THREE.MeshBasicMaterial({color:0xc9a84c,transparent:true,opacity:0.06-i*0.01})
+  );
+  ring.rotation.x=Math.PI/3+i*0.2;
+  ring.userData.speed=0.02-i*0.004;
+  scene.add(ring);
+}
+
+let moX=0,moY=0;
+document.addEventListener('mousemove',e=>{moX=(e.clientX/innerWidth-0.5);moY=-(e.clientY/innerHeight-0.5);});
+window.addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+
+const clock=new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const t=clock.getElapsedTime();
+  mat.uniforms.uT.value=t;
+  scene.children.forEach(c=>{if(c.userData.speed)c.rotation.y+=c.userData.speed;});
+  cam.position.x+=(moX*6-cam.position.x)*0.02;
+  cam.position.y+=(moY*3-cam.position.y)*0.02;
+  cam.lookAt(scene.position);
+  renderer.render(scene,cam);
+}
+animate();
+
+document.querySelectorAll('.reveal').forEach(el=>{
+  new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible');});},{threshold:0.1}).observe(el);
+});
+</script>
+</body>
+</html>
