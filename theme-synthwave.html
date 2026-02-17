@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYNTHWAVE.EXE — Retro Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0010;
+  --purple:#8800ff;
+  --magenta:#ff00cc;
+  --cyan:#00ffee;
+  --yellow:#ffee00;
+  --orange:#ff6600;
+  --text:#ff88dd;
+  --dim:#441144;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'VT323',monospace;
+  font-size:18px;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* VHS GLITCH LINES */
+.vhs{
+  position:fixed;inset:0;z-index:3;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(255,0,204,0.02),rgba(255,0,204,0.02) 1px,transparent 1px,transparent 4px);
+  animation:vhsShift 0.1s infinite;
+}
+@keyframes vhsShift{0%,100%{opacity:1;}50%{opacity:0.8;}}
+
+.vhs2{
+  position:fixed;inset:0;z-index:4;pointer-events:none;
+  mix-blend-mode:screen;
+  animation:chromaShift 8s infinite;
+}
+@keyframes chromaShift{
+  0%,96%,100%{transform:none;opacity:0;}
+  97%{transform:translateX(-4px);opacity:0.3;background:rgba(0,255,238,0.05);}
+  98%{transform:translateX(4px);opacity:0.3;background:rgba(255,0,204,0.05);}
+  99%{transform:none;opacity:0;}
+}
+
+canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+
+/* CURSOR */
+.cur{
+  position:fixed;width:4px;height:20px;
+  background:var(--magenta);pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 10px var(--magenta),0 0 20px var(--magenta);
+  animation:blinkC 0.7s infinite;
+}
+@keyframes blinkC{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* NAV */
+nav{
+  position:fixed;top:0;width:100%;z-index:100;
+  padding:20px 60px;
+  display:flex;justify-content:space-between;align-items:center;
+  background:linear-gradient(to bottom,rgba(10,0,16,0.95),transparent);
+  border-bottom:1px solid rgba(136,0,255,0.3);
+}
+.logo{
+  font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;
+  color:var(--magenta);
+  text-shadow:0 0 20px var(--magenta),0 0 40px var(--purple);
+  letter-spacing:4px;
+}
+.logo span{color:var(--cyan);}
+.nav-links{display:flex;gap:32px;list-style:none;}
+.nav-links a{
+  font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:3px;
+  color:var(--dim);text-decoration:none;text-transform:uppercase;
+  transition:all 0.3s;
+  text-shadow:none;
+}
+.nav-links a:hover{color:var(--cyan);text-shadow:0 0 10px var(--cyan);}
+
+/* BOTTOM INFO BAR */
+.infobar{
+  position:fixed;bottom:0;width:100%;z-index:100;
+  padding:6px 60px;background:rgba(10,0,16,0.9);
+  border-top:1px solid rgba(136,0,255,0.3);
+  display:flex;justify-content:space-between;
+  font-size:14px;color:var(--dim);
+  letter-spacing:2px;
+}
+.infobar span{color:var(--magenta);}
+
+section{position:relative;z-index:10;min-height:100vh;}
+
+/* HERO */
+#hero{
+  padding:0 60px;
+  display:flex;flex-direction:column;justify-content:center;
+  position:relative;overflow:hidden;
+}
+
+.retro-pre{
+  font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:8px;
+  color:var(--cyan);text-transform:uppercase;margin-bottom:20px;
+  opacity:0;animation:scanIn 0.8s 0.3s forwards;
+}
+.retro-pre::before{content:'> ';}
+
+.hero-h1{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(40px,8vw,120px);
+  font-weight:900;line-height:0.95;
+  letter-spacing:2px;
+  margin-bottom:32px;
+  opacity:0;animation:scanIn 0.8s 0.6s forwards;
+}
+.h-l1{
+  display:block;color:var(--magenta);
+  text-shadow:4px 4px 0 var(--purple),0 0 30px var(--magenta),0 0 60px rgba(255,0,204,0.3);
+}
+.h-l2{
+  display:block;color:var(--cyan);
+  text-shadow:4px 4px 0 rgba(0,100,200,0.6),0 0 30px var(--cyan);
+  -webkit-text-stroke:1px rgba(0,255,238,0.5);
+}
+.h-l3{
+  display:block;font-size:0.4em;letter-spacing:12px;color:var(--yellow);
+  text-shadow:0 0 20px var(--yellow);
+  margin-top:16px;
+}
+
+.hero-sub{
+  max-width:480px;font-size:20px;line-height:1.8;
+  color:rgba(255,136,221,0.6);margin-bottom:48px;
+  letter-spacing:1px;
+  opacity:0;animation:scanIn 0.8s 0.9s forwards;
+}
+
+.btns{display:flex;gap:20px;flex-wrap:wrap;opacity:0;animation:scanIn 0.8s 1.2s forwards;}
+
+.btn-retro{
+  padding:14px 40px;
+  background:var(--purple);
+  border:2px solid var(--magenta);
+  color:var(--magenta);
+  font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:4px;
+  text-transform:uppercase;cursor:none;text-decoration:none;
+  position:relative;
+  box-shadow:4px 4px 0 var(--magenta),0 0 20px rgba(136,0,255,0.4);
+  transition:all 0.2s;
+  display:inline-block;
+}
+.btn-retro:hover{
+  transform:translate(-2px,-2px);
+  box-shadow:6px 6px 0 var(--magenta),0 0 30px rgba(255,0,204,0.5);
+}
+.btn-retro-2{
+  padding:14px 40px;
+  background:transparent;
+  border:2px solid var(--cyan);
+  color:var(--cyan);
+  font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:4px;
+  text-transform:uppercase;cursor:none;text-decoration:none;
+  box-shadow:4px 4px 0 var(--cyan);
+  transition:all 0.2s;
+  display:inline-block;
+}
+.btn-retro-2:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--cyan);}
+
+/* SECTION */
+.sec-label{
+  font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:6px;
+  color:var(--cyan);text-transform:uppercase;margin-bottom:16px;
+}
+.sec-label::before{content:'/// ';}
+.sec-h2{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(32px,5vw,64px);
+  font-weight:900;line-height:0.95;letter-spacing:-1px;margin-bottom:24px;
+}
+.sec-h2 em{font-style:normal;color:var(--magenta);text-shadow:0 0 20px rgba(255,0,204,0.4);}
+
+/* ABOUT */
+#about{padding:120px 60px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+
+.stat-tape{display:flex;flex-direction:column;gap:4px;}
+.tape-item{
+  display:grid;grid-template-columns:200px 1fr 60px;align-items:center;gap:16px;
+  padding:16px 24px;
+  background:rgba(136,0,255,0.08);
+  border:1px solid rgba(136,0,255,0.2);
+  border-left:3px solid var(--magenta);
+}
+.tape-label{font-size:14px;color:rgba(255,136,221,0.6);letter-spacing:2px;}
+.tape-bar{height:3px;background:rgba(136,0,255,0.2);position:relative;overflow:hidden;}
+.tape-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--magenta));position:absolute;top:0;left:0;box-shadow:0 0 8px var(--magenta);}
+.tape-pct{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--cyan);text-align:right;}
+
+.retro-box{
+  padding:32px;
+  border:2px solid var(--purple);
+  background:rgba(136,0,255,0.05);
+  position:relative;
+  box-shadow:4px 4px 0 var(--purple);
+  margin-top:32px;
+}
+.retro-box::before{
+  content:'PLAYER STATS';position:absolute;top:-14px;left:20px;
+  background:var(--bg);padding:0 8px;
+  font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:4px;color:var(--cyan);
+}
+.retro-stat{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(136,0,255,0.15);font-size:16px;}
+.retro-stat:last-child{border-bottom:none;}
+.retro-stat-label{color:rgba(255,136,221,0.5);}
+.retro-stat-val{color:var(--magenta);font-family:'Orbitron',sans-serif;font-size:14px;}
+
+/* SKILLS */
+#skills{padding:120px 60px;}
+.skill-arcade{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:60px;}
+.skill-block{
+  padding:32px;
+  background:rgba(10,0,16,0.9);
+  border:2px solid var(--purple);
+  position:relative;cursor:none;
+  transition:all 0.3s;
+  box-shadow:inset 0 0 20px rgba(136,0,255,0.05);
+}
+.skill-block:hover{
+  border-color:var(--magenta);
+  box-shadow:0 0 20px rgba(255,0,204,0.2),inset 0 0 20px rgba(255,0,204,0.05);
+  transform:translateY(-4px);
+}
+.sk-icon{font-size:32px;margin-bottom:16px;}
+.sk-name{font-family:'Orbitron',sans-serif;font-size:16px;color:var(--magenta);margin-bottom:8px;letter-spacing:2px;}
+.sk-desc{font-size:16px;line-height:1.6;color:rgba(255,136,221,0.5);}
+.sk-lv{
+  margin-top:16px;font-family:'Orbitron',sans-serif;font-size:11px;color:var(--cyan);letter-spacing:3px;
+}
+.sk-lv::before{content:'LVL ';color:rgba(0,255,238,0.4);}
+
+/* WORK */
+#work{padding:120px 60px;}
+.work-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;margin-top:60px;}
+.work-card{
+  padding:40px;background:rgba(10,0,16,0.9);
+  border:2px solid rgba(136,0,255,0.3);
+  position:relative;cursor:none;overflow:hidden;
+  transition:all 0.3s;
+}
+.work-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--purple),var(--magenta),var(--cyan));
+  transform:scaleX(0);transform-origin:left;transition:transform 0.5s;
+}
+.work-card:hover{border-color:var(--magenta);}
+.work-card:hover::before{transform:scaleX(1);}
+.wc-year{font-size:14px;color:var(--dim);letter-spacing:3px;margin-bottom:12px;}
+.wc-name{font-family:'Orbitron',sans-serif;font-size:22px;color:var(--cyan);margin-bottom:12px;letter-spacing:2px;}
+.wc-desc{font-size:16px;line-height:1.6;color:rgba(255,136,221,0.5);}
+.wc-tech{margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;}
+.wc-tag{
+  padding:4px 12px;border:1px solid var(--purple);
+  font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;color:var(--purple);
+}
+
+/* CONTACT */
+#contact{padding:120px 60px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.contact-tv{
+  padding:60px 80px;
+  border:3px solid var(--magenta);
+  position:relative;
+  box-shadow:8px 8px 0 var(--purple),0 0 60px rgba(255,0,204,0.2);
+  background:rgba(10,0,16,0.95);
+  max-width:700px;width:100%;
+}
+.contact-tv::before{
+  content:'INSERT COIN';position:absolute;top:-16px;left:50%;transform:translateX(-50%);
+  background:var(--bg);padding:0 16px;
+  font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:6px;color:var(--yellow);
+  text-shadow:0 0 10px var(--yellow);animation:blink 1.5s infinite;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+.contact-msg{
+  font-family:'Orbitron',sans-serif;font-size:clamp(24px,4vw,48px);
+  color:var(--magenta);text-shadow:0 0 20px var(--magenta);
+  line-height:1.2;margin-bottom:32px;
+}
+.contact-email{
+  display:block;font-family:'Orbitron',sans-serif;font-size:16px;
+  color:var(--cyan);text-decoration:none;letter-spacing:4px;
+  text-shadow:0 0 10px var(--cyan);
+  border:1px solid var(--cyan);padding:16px 32px;
+  transition:all 0.3s;
+}
+.contact-email:hover{background:var(--cyan);color:var(--bg);box-shadow:0 0 30px var(--cyan);}
+
+footer{
+  position:relative;z-index:10;padding:20px 60px;
+  border-top:1px solid rgba(136,0,255,0.3);
+  display:flex;justify-content:space-between;
+  font-size:14px;color:var(--dim);letter-spacing:2px;
+}
+
+@keyframes scanIn{from{opacity:0;transform:translateX(-30px);}to{opacity:1;transform:none;}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.8s,transform 0.8s;}
+.reveal.visible{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+
+<div class="cur" id="cur"></div>
+<div class="vhs"></div>
+<div class="vhs2"></div>
+<canvas id="c"></canvas>
+
+<nav>
+  <div class="logo">SYNTH<span>WAVE</span>.EXE</div>
+  <ul class="nav-links">
+    <li><a href="#about">PROFILE</a></li>
+    <li><a href="#skills">SKILLS</a></li>
+    <li><a href="#work">WORKS</a></li>
+    <li><a href="#contact">CONTACT</a></li>
+  </ul>
+</nav>
+
+<div class="infobar">
+  <span>MKA.SYS <span>ONLINE</span></span>
+  <span id="clk">LOADING...</span>
+  <span>YANGON <span>MM</span> 2024</span>
+</div>
+
+<section id="hero">
+  <div class="retro-pre">SYSTEM BOOT SEQUENCE COMPLETE</div>
+  <h1 class="hero-h1">
+    <span class="h-l1">CREATIVE</span>
+    <span class="h-l2">CODER</span>
+    <span class="h-l3">Press Start to Begin</span>
+  </h1>
+  <p class="hero-sub">
+    FULLSTACK DEVELOPER // DIGITAL ARCHITECT<br>
+    BUILDING THE FUTURE, ONE PIXEL AT A TIME
+  </p>
+  <div class="btns">
+    <a href="#work" class="btn-retro">▶ PLAY</a>
+    <a href="#contact" class="btn-retro-2">⬡ CONNECT</a>
+  </div>
+</section>
+
+<section id="about">
+  <div>
+    <div class="sec-label reveal">PLAYER PROFILE</div>
+    <h2 class="sec-h2 reveal">About<br>The <em>Player</em></h2>
+    <p style="font-size:18px;line-height:1.8;color:rgba(255,136,221,0.6);margin-bottom:32px;" class="reveal">
+      LOADING BIOGRAPHY...<br><br>
+      5+ years in the digital realm. Expert in crafting experiences that feel like they came straight out of a fever dream. Former CTO. Current creative coder.
+    </p>
+    <div class="retro-box reveal">
+      <div class="retro-stat"><span class="retro-stat-label">EXPERIENCE</span><span class="retro-stat-val">5 YEARS</span></div>
+      <div class="retro-stat"><span class="retro-stat-label">PROJECTS</span><span class="retro-stat-val">50+</span></div>
+      <div class="retro-stat"><span class="retro-stat-label">CLIENTS</span><span class="retro-stat-val">30+</span></div>
+      <div class="retro-stat"><span class="retro-stat-label">STATUS</span><span class="retro-stat-val" style="color:var(--cyan)">AVAILABLE ✓</span></div>
+    </div>
+  </div>
+
+  <div class="reveal">
+    <div style="font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:4px;color:var(--cyan);margin-bottom:20px;">SKILL LEVEL</div>
+    <div class="stat-tape">
+      <div class="tape-item">
+        <div class="tape-label">FRONTEND</div>
+        <div class="tape-bar"><div class="tape-fill" style="width:92%;"></div></div>
+        <div class="tape-pct">92</div>
+      </div>
+      <div class="tape-item">
+        <div class="tape-label">UI/UX DESIGN</div>
+        <div class="tape-bar"><div class="tape-fill" style="width:88%;"></div></div>
+        <div class="tape-pct">88</div>
+      </div>
+      <div class="tape-item">
+        <div class="tape-label">3D / WEBGL</div>
+        <div class="tape-bar"><div class="tape-fill" style="width:80%;"></div></div>
+        <div class="tape-pct">80</div>
+      </div>
+      <div class="tape-item">
+        <div class="tape-label">BACKEND</div>
+        <div class="tape-bar"><div class="tape-fill" style="width:75%;"></div></div>
+        <div class="tape-pct">75</div>
+      </div>
+      <div class="tape-item">
+        <div class="tape-label">MOBILE</div>
+        <div class="tape-bar"><div class="tape-fill" style="width:72%;"></div></div>
+        <div class="tape-pct">72</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="sec-label reveal">POWER-UPS</div>
+  <h2 class="sec-h2 reveal">Tech <em>Arsenal</em></h2>
+  <div class="skill-arcade">
+    <div class="skill-block reveal">
+      <div class="sk-icon">⬡</div>
+      <div class="sk-name">Frontend</div>
+      <div class="sk-desc">React, Vue, Three.js, GSAP. Interfaces that react to your soul.</div>
+      <div class="sk-lv">92</div>
+    </div>
+    <div class="skill-block reveal">
+      <div class="sk-icon">◈</div>
+      <div class="sk-name">Design</div>
+      <div class="sk-desc">Figma, motion, systems. Pixels with purpose and personality.</div>
+      <div class="sk-lv">88</div>
+    </div>
+    <div class="skill-block reveal">
+      <div class="sk-icon">◎</div>
+      <div class="sk-name">WebGL / 3D</div>
+      <div class="sk-desc">Three.js, shaders, immersive worlds born in the browser.</div>
+      <div class="sk-lv">80</div>
+    </div>
+    <div class="skill-block reveal">
+      <div class="sk-icon">▲</div>
+      <div class="sk-name">Backend</div>
+      <div class="sk-desc">Node, Python, databases. The engine under the hood.</div>
+      <div class="sk-lv">75</div>
+    </div>
+    <div class="skill-block reveal">
+      <div class="sk-icon">□</div>
+      <div class="sk-name">Mobile</div>
+      <div class="sk-desc">React Native, Flutter. Apps that live in your pocket.</div>
+      <div class="sk-lv">72</div>
+    </div>
+    <div class="skill-block reveal">
+      <div class="sk-icon">⬟</div>
+      <div class="sk-name">AI / ML</div>
+      <div class="sk-desc">LLMs, embeddings, building intelligent digital beings.</div>
+      <div class="sk-lv">85</div>
+    </div>
+  </div>
+</section>
+
+<section id="work">
+  <div class="sec-label reveal">MISSION SELECT</div>
+  <h2 class="sec-h2 reveal">Past <em>Adventures</em></h2>
+  <div class="work-cards">
+    <div class="work-card reveal">
+      <div class="wc-year">2024</div>
+      <div class="wc-name">NEBULA OS</div>
+      <div class="wc-desc">Browser-based OS with 3D UI and AI workspace. 10k+ users.</div>
+      <div class="wc-tech"><span class="wc-tag">REACT</span><span class="wc-tag">THREE.JS</span><span class="wc-tag">NODE</span></div>
+    </div>
+    <div class="work-card reveal">
+      <div class="wc-year">2024</div>
+      <div class="wc-name">VOID MARKET</div>
+      <div class="wc-desc">Immersive e-commerce with 3D product views and haptic UX.</div>
+      <div class="wc-tech"><span class="wc-tag">NEXT.JS</span><span class="wc-tag">POSTGRES</span><span class="wc-tag">STRIPE</span></div>
+    </div>
+    <div class="work-card reveal">
+      <div class="wc-year">2023</div>
+      <div class="wc-name">NEURAL DASH</div>
+      <div class="wc-desc">Real-time analytics platform with AI insights for 30+ enterprises.</div>
+      <div class="wc-tech"><span class="wc-tag">D3.JS</span><span class="wc-tag">PYTHON</span><span class="wc-tag">REDIS</span></div>
+    </div>
+    <div class="work-card reveal">
+      <div class="wc-year">2023</div>
+      <div class="wc-name">PHANTOM APP</div>
+      <div class="wc-desc">50k+ user mobile app with gesture-first design and AR features.</div>
+      <div class="wc-tech"><span class="wc-tag">FLUTTER</span><span class="wc-tag">FIREBASE</span><span class="wc-tag">ARKit</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="contact-tv reveal">
+    <div class="contact-msg">WANNA<br>PLAY?</div>
+    <a href="mailto:hello@synthwave.dev" class="contact-email">hello@synthwave.dev</a>
+  </div>
+</section>
+
+<footer>
+  <span>© 2024 SYNTHWAVE.EXE</span>
+  <span>THREE.JS + CSS3 + VHS_VIBES</span>
+  <span>YANGON.MM</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// CURSOR
+const cur=document.getElementById('cur');
+document.addEventListener('mousemove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
+
+// CLOCK
+function clk(){const n=new Date();document.getElementById('clk').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');}
+setInterval(clk,1000);clk();
+
+// THREE.JS — Retro grid + neon grid
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:false,alpha:true});
+renderer.setPixelRatio(1); // Low res for retro feel
+renderer.setSize(innerWidth,innerHeight);
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,200);
+cam.position.set(0,8,30);
+cam.lookAt(0,-4,0);
+
+// FLOOR GRID (perspective grid like synthwave)
+const gridMat=(color,opacity)=>new THREE.LineBasicMaterial({color,transparent:true,opacity});
+
+function makeRetroGrid(z,colH,colV,op){
+  const g=new THREE.Group();
+  const mH=gridMat(colH,op);
+  const mV=gridMat(colV,op);
+  for(let i=0;i<=20;i++){
+    const y=-8; const x=-20+i*2;
+    const h=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-20,y,z),new THREE.Vector3(20,y,z)]);
+    const v=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,y,z-60),new THREE.Vector3(x,y,z)]);
+    g.add(new THREE.Line(h,mH));
+    g.add(new THREE.Line(v,mV));
+  }
+  return g;
+}
+
+const retroGrid=makeRetroGrid(10,0xff00cc,0x8800ff,0.25);
+scene.add(retroGrid);
+
+// SUN (retro gradient disc)
+const sunGeo=new THREE.CircleGeometry(12,32);
+const sunMat=new THREE.MeshBasicMaterial({color:0xff6600,transparent:true,opacity:0.8});
+const sun=new THREE.Mesh(sunGeo,sunMat);
+sun.position.set(0,5,-60);
+scene.add(sun);
+
+// SUN LINES
+for(let i=0;i<8;i++){
+  const line=new THREE.Mesh(
+    new THREE.PlaneGeometry(24,0.4-i*0.04),
+    new THREE.MeshBasicMaterial({color:0x0a0010,transparent:true,opacity:1})
+  );
+  line.position.set(0,5-i*1.2,-59.9);
+  scene.add(line);
+}
+
+// NEON STARS
+const starGeo=new THREE.BufferGeometry();
+const starPos=new Float32Array(800*3);
+const starCols=new Float32Array(800*3);
+const neonCols=[[1,0,0.8],[0,1,0.93],[1,0.93,0],[0.53,0,1]];
+for(let i=0;i<800;i++){
+  starPos[i*3]=(Math.random()-0.5)*200;
+  starPos[i*3+1]=(Math.random()-0.5)*80+20;
+  starPos[i*3+2]=-80-Math.random()*100;
+  const c=neonCols[Math.floor(Math.random()*neonCols.length)];
+  starCols[i*3]=c[0];starCols[i*3+1]=c[1];starCols[i*3+2]=c[2];
+}
+starGeo.setAttribute('position',new THREE.BufferAttribute(starPos,3));
+starGeo.setAttribute('color',new THREE.BufferAttribute(starCols,3));
+const stars=new THREE.Points(starGeo,new THREE.PointsMaterial({size:0.4,vertexColors:true,transparent:true,opacity:0.9}));
+scene.add(stars);
+
+let moX=0;
+document.addEventListener('mousemove',e=>{moX=(e.clientX/innerWidth-0.5)*0.3;});
+window.addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+
+const clock=new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const t=clock.getElapsedTime();
+  retroGrid.position.z=-(t*2)%2;
+  cam.position.x+=(moX*4-cam.position.x)*0.03;
+  cam.lookAt(0,-4,0);
+  stars.rotation.z=Math.sin(t*0.05)*0.01;
+  renderer.render(scene,cam);
+}
+animate();
+
+document.querySelectorAll('.reveal').forEach(el=>{
+  new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible');});},{threshold:0.1}).observe(el);
+});
+</script>
+</body>
+</html>
